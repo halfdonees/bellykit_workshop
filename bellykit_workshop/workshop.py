@@ -8,7 +8,7 @@ import talib
 
 import os
 
-datafile = os.abspath(os.path.join(os.dirname(__file__), '..','data','workshop_data.csv'))
+datafile = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','data','workshop_data.csv'))
 
 data0050 = pd.read_csv(datafile, header=None)
 data0050.columns = ['date', 'symbol', 'open', 'high', 'low', 'close', 'volume', 'adj_open']
