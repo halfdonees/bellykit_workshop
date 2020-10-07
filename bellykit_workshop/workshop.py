@@ -7,7 +7,7 @@ import talib
 # engine = bellykit.bellykit_sql.login_guest('stock')
 
 
-data0050 = pd.read_csv('data/workshop_data3.csv', header=None)
+data0050 = pd.read_csv('data/workshop_data.csv', header=None)
 data0050.columns = ['date', 'symbol', 'open', 'high', 'low', 'close', 'volume', 'adj_open']
 #data0050.columns = ['date', 'symbol', 'open', 'high', 'low', 'close', 'volume']
 data0050.set_index('date', drop=True, inplace=True)
