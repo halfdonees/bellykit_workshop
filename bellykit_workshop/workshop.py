@@ -31,6 +31,7 @@ def get_price(*args):
     2354, 2474); 
     '''
     global data
+    data = None
     for symbol in args:
         # price = bellykit.data_api.get_price(str(symbol), select=['DATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME'], start='20120101')
         # price.columns = price.columns.str.lower()
