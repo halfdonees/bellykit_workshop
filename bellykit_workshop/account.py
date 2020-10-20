@@ -1,10 +1,11 @@
 class Hold():
-    def __init__(self, symbol, price, share, adj_price):
+    def __init__(self, symbol, price, share, adj_price, entry_date):
         self.symbol = symbol
         self.price = price
         self.share = share
         self.adj_price = adj_price
         self.cost = price * share
+        self.entry_date = entry_date
 
     def __str__(self):
         return f'Stock[{self.symbol}]'
@@ -25,6 +26,10 @@ class Account():
         self.to_sell = None
 
         self.__row = None
+
+        self.daily_equity = []
+        self.history_trade = []
+        self.exited_trade = []
 
     def buy(self, symbol, over=False):
         print('預計隔天買進', symbol)
@@ -61,8 +66,15 @@ class Account():
             print('realized_equity:', realized_equity)
             print('equity change:', realized_equity - self.hold.cost)
 
+            new_trade = [row['DATE'], self.hold.symbol, 'sell', price, share]
+            self.history_trade.append(new_trade)
+
+            exited_trade = [self.hold.symbol, self.hold.entry_date, row['DATE'], self.hold.price, price, share]
+            self.exited_trade.append(exited_trade)
+
             self.hold = None
             self.to_sell = False
+
 
 
         if self.to_buy:
@@ -70,12 +82,17 @@ class Account():
             symbol = self.to_buy
             share = int(self.equity / row[symbol, 'open'])
             cost = share * row[symbol, 'open']
+            price = row[symbol, 'open']
             new_hold = Hold(symbol = symbol,
-                        price = row[symbol, 'open'],
+                        price = price,
                         share = share,
-                        adj_price = row[symbol, 'adj_open'])
-
+                        adj_price = row[symbol, 'adj_open'],
+                        entry_date = row['DATE'])
 
             self.hold = new_hold
+
+            new_trade = [row['DATE'], self.hold.symbol, 'buy', price, share]
+            self.history_trade.append(new_trade)
+
             self.equity -= cost
             self.to_buy = None
