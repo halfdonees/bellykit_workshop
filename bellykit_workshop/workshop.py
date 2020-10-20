@@ -37,6 +37,8 @@ def get_price(*args):
             pass
         except KeyError:
             pass
+        except TypeError:
+            pass
         except Exception as e:
             raise e
 
@@ -48,7 +50,7 @@ def get_price(*args):
             print(f'no stock({symbol}) data')
             continue
 
-        # del price['symbol']
+        del price['symbol']
         # price.loc[:, ('adj_open')] = price.loc[:, ('open')].copy()
         # price['adj_open'] = price['open'].copy()
 
