@@ -66,10 +66,10 @@ class Account():
             print('realized_equity:', realized_equity)
             print('equity change:', realized_equity - self.hold.cost)
 
-            new_trade = [row['DATE'], self.hold.symbol, 'sell', price, share]
+            new_trade = [row.name, self.hold.symbol, 'sell', price, share]
             self.history_trade.append(new_trade)
 
-            exited_trade = [self.hold.symbol, self.hold.entry_date, row['DATE'], self.hold.price, price, share]
+            exited_trade = [self.hold.symbol, self.hold.entry_date, row.name, self.hold.price, price, share]
             self.exited_trade.append(exited_trade)
 
             self.hold = None
@@ -87,11 +87,11 @@ class Account():
                         price = price,
                         share = share,
                         adj_price = row[symbol, 'adj_open'],
-                        entry_date = row['DATE'])
+                        entry_date = row.name)
 
             self.hold = new_hold
 
-            new_trade = [row['DATE'], self.hold.symbol, 'buy', price, share]
+            new_trade = [row.name, self.hold.symbol, 'buy', price, share]
             self.history_trade.append(new_trade)
 
             self.equity -= cost
