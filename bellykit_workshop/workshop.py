@@ -96,6 +96,21 @@ def RSI(symbol, period, price='close'):
     # data[(symbol, name)] = rsi_df
     return
 
+def KD(symbol, rsv_period=9, k_period=3, d_period=3, price='close'):
+    global data
+    ll = data[symbol, 'low'].rolling(rsv_period, min_periods=1).min()
+    hh = data[symbol, 'high'].rolling(rsv_period, min_periods=1).max()
+    RSV = (data[symbol, 'close'] - ll) / (hh - ll)
+    fD = RSV.ewm(com=k_period-1, min_periods=1).mean()
+    sK = fD.copy()
+    sD = sK.ewm(com=d_period-1, min_periods=1).mean()
+
+    data[symbol, f'K{rsv_period}'] = sK
+    data[symbol, f'D{rsv_period}'] = sD
+
+    kds = pd.DataFrame({'RSV': RSV, 'fD': fD})
+    return kds
+
 def crossover(symbol, ind1, ind2):
     global data
     name = f'{ind1}x{ind2}'
@@ -109,3 +124,17 @@ def get_random_data(*args):
     global data
     data = np.random.random(10, 4)
     return data
+
+
+import numpy as np
+def sort_columns():
+    global data
+    columns = np.array(data.columns)
+    symbols = [i[0] for i in columns]
+    sorted_columns = columns[np.argsort(symbols)]
+    print(sorted_columns)
+
+    new_columns = pd.MultiIndex.from_tuples(sorted_columns)
+    data = data[new_columns]
+
+    

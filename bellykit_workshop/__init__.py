@@ -6,6 +6,7 @@ from bellykit_workshop.workshop import(
         get_price,
         MA,
         RSI,
+        KD,
         crossover
         )
 
