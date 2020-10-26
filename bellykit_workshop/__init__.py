@@ -4,10 +4,7 @@ from bellykit_workshop import (
 
 from bellykit_workshop.workshop import(
         get_price,
-        MA,
-        RSI,
-        KD,
-        crossover
+        Price,
         )
 
 from bellykit_workshop.account import(

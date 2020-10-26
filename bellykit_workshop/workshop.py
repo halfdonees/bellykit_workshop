@@ -16,8 +16,6 @@ data0050.columns = ['date', 'symbol', 'open', 'high', 'low', 'close', 'volume', 
 data0050.set_index('date', drop=True, inplace=True)
 
 
-data = None
-
 def get_price(*args):
     '''
     取得台灣50成分股的股價資訊。
@@ -30,7 +28,7 @@ def get_price(*args):
     3673, 2412, 2498, 3045, 4904, 2308, 2347, 2317,
     2354, 2474); 
     '''
-    global data
+    data = None
     for symbol in args:
         try:
             data[symbol]
@@ -76,65 +74,68 @@ def get_price(*args):
 
     return data
 
-def MA(symbol, period, price='close'):
-    global data
-    name = f'MA{period}'
-    ma_series = data[symbol, price].rolling(period).mean().fillna(0)
-    ma_df = pd.DataFrame(ma_series)
-    ma_df.columns = pd.MultiIndex.from_tuples([(symbol, name)])
-    data[(symbol, name)] = ma_df
-    # data = data.sort_index(axis=1)
-    return
 
-def RSI(symbol, period, price='close'):
-    global data
-    name = f'RSI{period}'
-    rsi_series = talib.RSI(data[symbol, 'close'], timeperiod=period).fillna(0)
-    data[symbol, name] = rsi_series
-    # rsi_df = pd.DataFrame(rsi_series)
-    # rsi_df.columns = pd.MultiIndex.from_tuples([(symbol, name)])
-    # data[(symbol, name)] = rsi_df
-    return
-
-def KD(symbol, rsv_period=9, k_period=3, d_period=3, price='close'):
-    global data
-    ll = data[symbol, 'low'].rolling(rsv_period, min_periods=1).min()
-    hh = data[symbol, 'high'].rolling(rsv_period, min_periods=1).max()
-    RSV = (data[symbol, 'close'] - ll) / (hh - ll)
-    fD = RSV.ewm(com=k_period-1, min_periods=1).mean()
-    sK = fD.copy()
-    sD = sK.ewm(com=d_period-1, min_periods=1).mean()
-
-    data[symbol, f'K{rsv_period}'] = sK
-    data[symbol, f'D{rsv_period}'] = sD
-
-    kds = pd.DataFrame({'RSV': RSV, 'fD': fD})
-    return kds
-
-def crossover(symbol, ind1, ind2):
-    global data
-    name = f'{ind1}x{ind2}'
-    c1 = data[symbol, ind1] > data[symbol, ind2]
-    c2 = (~c1).shift(1, fill_value=False)
-    crossover_series = (c1&c2)
-    data[symbol, name] = crossover_series
-    return
-
-def get_random_data(*args):
-    global data
-    data = np.random.random(10, 4)
-    return data
+class Price():
+    def __init__(self, *args):
+        self.data = get_price(*args)
 
 
-import numpy as np
-def sort_columns():
-    global data
-    columns = np.array(data.columns)
-    symbols = [i[0] for i in columns]
-    sorted_columns = columns[np.argsort(symbols)]
-    print(sorted_columns)
-
-    new_columns = pd.MultiIndex.from_tuples(sorted_columns)
-    data = data[new_columns]
-
+    def MA(self, symbol, period, price='close'):
+        name = f'MA{period}'
+        ma_series = self.data[symbol, price].rolling(period).mean().fillna(0)
+        ma_df = pd.DataFrame(ma_series)
+        ma_df.columns = pd.MultiIndex.from_tuples([(symbol, name)])
+        self.data[(symbol, name)] = ma_df
+        # data = data.sort_index(axis=1)
+        self.sort_columns()
+        return
+    
+    def RSI(self, symbol, period, price='close'):
+        name = f'RSI{period}'
+        rsi_series = talib.RSI(self.data[symbol, 'close'], timeperiod=period).fillna(0)
+        self.data[symbol, name] = rsi_series
+        # rsi_df = pd.DataFrame(rsi_series)
+        # rsi_df.columns = pd.MultiIndex.from_tuples([(symbol, name)])
+        # self.data[(symbol, name)] = rsi_df
+        self.sort_columns()
+        return
+    
+    def KD(self, symbol, rsv_period=9, k_period=3, d_period=3, price='close'):
+        ll = self.data[symbol, 'low'].rolling(rsv_period, min_periods=1).min()
+        hh = self.data[symbol, 'high'].rolling(rsv_period, min_periods=1).max()
+        RSV = (self.data[symbol, 'close'] - ll) / (hh - ll)
+        fD = RSV.ewm(com=k_period-1, min_periods=1).mean()
+        sK = fD.copy()
+        sD = sK.ewm(com=d_period-1, min_periods=1).mean()
+    
+        self.data[symbol, f'K{rsv_period}'] = sK
+        self.data[symbol, f'D{rsv_period}'] = sD
+    
+        kds = pd.DataFrame({'RSV': RSV, 'fD': fD})
+        self.sort_columns()
+        return kds
+    
+    def crossover(self, symbol, ind1, ind2):
+        name = f'{ind1}x{ind2}'
+        c1 = self.data[symbol, ind1] > self.data[symbol, ind2]
+        c2 = (~c1).shift(1, fill_value=False)
+        crossover_series = (c1&c2)
+        self.data[symbol, name] = crossover_series
+        self.sort_columns()
+        return
+    
+    def get_random_data(self, *args):
+        self.data = np.random.random(10, 4)
+        return self.data
+    
+    
+    def sort_columns(self):
+        columns = np.array(self.data.columns)
+        symbols = [i[0] for i in columns]
+        sorted_columns = columns[np.argsort(symbols)]
+    
+        new_columns = pd.MultiIndex.from_tuples(sorted_columns)
+        self.data = self.data[new_columns]
+        
+    
     
